@@ -167,9 +167,11 @@ class NoteBag:
         self.note_name_entry_strvar.trace("w", self.note_name_entry_changed)
         self.note_name_entry = Entry(input_frame,
                                      textvariable=self.note_name_entry_strvar)
-        self.note_name_entry.pack(side=LEFT, fill=X, expand=True)
-        self.note_name_entry.bind("<Return>", self.note_name_action_callback)
-        self.note_name_entry.bind("<KP_Enter>", self.note_name_action_callback)
+        note_name_entry = self.note_name_entry
+        note_name_entry.pack(side=LEFT, fill=X, expand=True)
+        note_name_entry.focus_set()
+        note_name_entry.bind("<Return>", self.note_name_action_callback)
+        note_name_entry.bind("<KP_Enter>", self.note_name_action_callback)
 
         self.note_name_action_strvar = StringVar()
         note_name_action_strvar = self.note_name_action_strvar
