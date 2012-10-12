@@ -109,9 +109,8 @@ class NoteBag:
 
     def get_note_name_key(self, note_name):
         note_names = self.notes.keys()
-        note_names = map(lambda s: s.lower(), note_names)
         for existing_note_name in note_names:
-            if note_name.lower() == existing_note_name:
+            if note_name.lower() == existing_note_name.lower():
                 return existing_note_name
         return None
 
