@@ -4,31 +4,29 @@ CONFIG_FILENAME = "NoteBag.ini"
 
 # For getting the config file
 import hashlib
-from helpers import get_called_script_dir, read_config
-import os.path
+from helpers import get_called_script_dir, read_config, save_config
+import os
 import pickle
 import string
 import subprocess
-import sys
-try:
-    import messagebox
-except ImportError:
-    import tkMessageBox as messagebox
+import sys # for platform
 
 try:
     # Widgets
     from tkinter import (Button, Entry, Frame, Label, Listbox,
-                     Scrollbar, Tk, StringVar)
+                         Scrollbar, Tk, StringVar)
+    from tkinter import messagebox, filedialog
     # Constants
     from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 except ImportError:
     # Widgets
     from Tkinter import (Button, Entry, Frame, Label, Listbox,
                          Scrollbar, Tk, StringVar)
+    import tkMessageBox as messagebox, FileDialog as filedialog
     # Constants
     from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
-if sys.platform.lower() == "nt":
+if os.name.lower() == "nt":
     import win32process
 
 PICKLE_PROTOCOL = 2
@@ -75,12 +73,30 @@ def create_skeleton_note(note_name, note_path, template_file_path):
         for line in skeleton_lines:
             f.write(line)
 
-def open_note(document_editor, note_path):
-    if sys.platform.lower() == "nt":
-        creationflags = win32process.DETACHED_PROCESS
+def open_note(note_path, document_editor=None):
+    # Choose the document editor and Popen() settings based on the
+    # operating system. Use the document_editor arg if available;
+    # otherwise, use the operating-system-appropriate command that
+    # will open the default program for the file type.
+    #
+    # This is SUPER UGLY.
+    creationflags = 0
+    if document_editor:
+        program = document_editor
+    elif os.name.lower() == "nt":
+        creationflags |= win32process.DETACHED_PROCESS
+        program = "start"
+    elif sys.platform.lower() == "darwin":
+        # Mac OSX
+        program = "open"
+    elif os.name.lower() == "posix":
+        program = "xdg-open"
     else:
-        creationflags = 0
-    subprocess.Popen([document_editor, note_path], creationflags=creationflags,
+        messagebox.showerror("OS Not Supported",
+                             "Your operating system is not supported")
+        return
+
+    subprocess.Popen([program, note_path], creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
 
@@ -188,11 +204,16 @@ class NoteBag:
     def open_note(self, note_name):
         note_filename = self.notes[note_name]
         note_path = os.path.join(self.notes_dir, note_filename)
-        open_note(self.document_editor, note_path)
+        open_note(note_path, self.document_editor)
 
     ## GUI Callbacks
     def note_name_action_callback(self, *_args, **_kwargs):
         note_name = self.get_entered_note_name()
+        note_name = sanitize_note_name(note_name)
+        if not note_name:
+            messagebox.showwarning("Error", "Can't add note: no note name entered")
+            return
+
         key = self.get_note_name_key(note_name)
         if key:
             # The note exists; open it.
@@ -314,7 +335,41 @@ class NoteBag:
         self.load_notes_list()
         self.update_note_names_list()
 
+def maybe_first_time_setup():
+    config = read_config(CONFIG_FILENAME)
+    if config.get("NoteBag", "Notes Directory"):
+       return True
+
+    # Hide the main root window, and only show the dialogs.
+    root = Tk()
+    root.withdraw()
+
+    if not messagebox.askokcancel(
+            "NoteBag Setup",
+            "This is the first time you have run NoteBag\n"
+            "Please choose the folder where you would like NoteBag to keep your notes"
+            ):
+        root.destroy()
+        return False
+
+    notes_dir = filedialog.askdirectory(title="Notes Folder")
+    print(notes_dir)
+    if not notes_dir:
+        root.destroy()
+        return False
+
+    config.set("NoteBag", "Notes Directory", notes_dir)
+    save_config(config, CONFIG_FILENAME)
+    root.destroy()
+    return True
+
+
 if __name__ == "__main__":
+    if not maybe_first_time_setup():
+        print("Exiting: user refused to setup NoteBag")
+        exit(1)
+
+    # Create the main window
     root = Tk()
     root.title("NoteBag")
     notebag = NoteBag(root)

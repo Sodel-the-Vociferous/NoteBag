@@ -3,18 +3,19 @@
 =============
 
 My dad wanted a simple program to manage notes on his computer, so I
-wrote one.
+wrote one. It's a simple program, but I hope someone in addition to my
+dad finds it useful or interesting.
 
-NoteBag.py is the main NoteBag program to run. The first time you run
-NoteBag, it will ask you to choose the folder where it will store all
-of the notes you create.
+NoteBag.py is the main program to run. The first time you run NoteBag,
+it will ask you to choose the folder where it will store all of the
+notes you create.
 
 The "Note Name" text box is used to add new notes, and to
 automatically search through the notes you already have. If the "Note
 Name" text box is empty, the bottom of the program window will list
-all of the notes you already have. As you enter text into the "Note
-Name" text box, the bottom of the program window only show note names
-that contain the text you have typed.
+all of your existing notes. As you enter text into the "Note Name"
+text box, the bottom of the program window only show note names that
+contain the text you have typed.
 
 If you have typed the exact name of an existing note into the "Note
 Name" text box, and you hit the "Enter" key or the "Open" button,
@@ -26,9 +27,6 @@ name, and NoteBag does its best to make sure of that.
 
 The button next to the "Note Name" text box will be labeled "Open" or
 "Add" automatically, depending on what's appropriate.
-
-It's a simple program, but I hope someone in addition to my dad finds
-it useful or interesting.
 
 
 NoteBag is licensed under the Expat License (commonly known as the MIT

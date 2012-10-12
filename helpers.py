@@ -21,3 +21,9 @@ def read_config(filename):
     config = configparser.ConfigParser()
     config.read(config_path)
     return config
+
+def save_config(config, filename):
+    config_dir = get_called_script_dir()
+    config_path = os.path.join(config_dir, filename)
+    with open(config_path, 'w') as f:
+        config.write(f)
