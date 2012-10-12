@@ -142,7 +142,8 @@ class NoteBag:
         self.notes[note_name] = note_filename
         self.save_notes_list()
 
-    def update_note_names_list(self, search_str=""):
+    def update_note_names_list(self):
+        search_str = self.get_entered_note_name()
         note_names = self.notes.keys()
 
         # Remove strings that don't match
@@ -189,9 +190,9 @@ class NoteBag:
         self.clear_note_name_entry()
 
     def note_name_entry_changed(self, *_args, **_kwargs):
-        entered_note_name = self.get_entered_note_name()
-        self.update_note_names_list(search_str=entered_note_name)
+        self.update_note_names_list()
 
+        entered_note_name = self.get_entered_note_name()
         if self.get_note_name_key(entered_note_name):
             self.note_name_action_strvar.set("Open")
         else:
