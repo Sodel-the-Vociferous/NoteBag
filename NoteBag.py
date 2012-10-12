@@ -68,6 +68,7 @@ class NoteBag:
     notes_filename = None
     notes_dir = None
     note_template_filename = None
+    document_editor = None
 
     # GUI Elements
     note_name_action_strvar = None
@@ -90,6 +91,7 @@ class NoteBag:
         self.notes_list_filename = config.get("NoteBag", "Notes List File")
         self.notes_dir = config.get("NoteBag", "Notes Directory")
         self.note_template_filename = config.get("NoteBag", "Note Template Filename")
+        self.document_editor = config.get("NoteBag", "Document Editor")
 
     def load_notes_list(self):
         # TODO handle exceptions
