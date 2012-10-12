@@ -11,7 +11,7 @@ import string
 import subprocess
 import sys
 try:
-    import messagebox
+    from tkinter import messagebox
 except ImportError:
     import tkMessageBox as messagebox
 
