@@ -209,6 +209,11 @@ class NoteBag:
     ## GUI Callbacks
     def note_name_action_callback(self, *_args, **_kwargs):
         note_name = self.get_entered_note_name()
+        note_name = sanitize_note_name(note_name)
+        if not note_name:
+            messagebox.showwarning("Error", "Can't add note: no note name entered")
+            return
+
         key = self.get_note_name_key(note_name)
         if key:
             # The note exists; open it.
