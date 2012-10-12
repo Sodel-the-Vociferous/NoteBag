@@ -3,8 +3,9 @@
 =============
 
 My dad wanted a simple program to manage notes on his computer, so I
-wrote one. It's a simple program, but I hope someone in addition to my
-dad finds it useful or interesting.
+wrote NoteBag. It's pretty bare, both in appearance and functionality,
+but I hope someone in addition to my dad finds it useful or
+interesting.
 
 NoteBag.py is the main program to run. The first time you run NoteBag,
 it will ask you to choose the folder where it will store all of the
@@ -29,7 +30,7 @@ The button next to the "Note Name" text box will be labeled "Open" or
 "Add" automatically, depending on what's appropriate.
 
 
-NoteBag is licensed under the Expat License (commonly known as the MIT
-License), which means you can basically do whatever you want with it,
-as long as you don't misrepresent who did the work. See LICENSE.txt for
-the full license. (It's quite short.)
+NoteBag is free software; it is licensed under the Expat License
+(commonly known as the MIT License), which means you can basically do
+whatever you want with it, as long as you don't misrepresent who did
+the work. See LICENSE.txt for the full license. (It's quite short.)
