@@ -9,7 +9,7 @@ import os
 import pickle
 import string
 import subprocess
-import sys
+import sys # for platform
 
 try:
     # Widgets
@@ -73,12 +73,30 @@ def create_skeleton_note(note_name, note_path, template_file_path):
         for line in skeleton_lines:
             f.write(line)
 
-def open_note(document_editor, note_path):
-    if sys.platform.lower() == "nt":
-        creationflags = win32process.DETACHED_PROCESS
+def open_note(note_path, document_editor=None):
+    # Choose the document editor and Popen() settings based on the
+    # operating system. Use the document_editor arg if available;
+    # otherwise, use the operating-system-appropriate command that
+    # will open the default program for the file type.
+    #
+    # This is SUPER UGLY.
+    creationflags = 0
+    if document_editor:
+        program = document_editor
+    elif os.name.lower() == "nt":
+        creationflags |= win32process.DETACHED_PROCESS
+        program = "start"
+    elif sys.platform.lower() == "darwin":
+        # Mac OSX
+        program = "open"
+    elif os.name.lower() == "posix":
+        program = "xdg-open"
     else:
-        creationflags = 0
-    subprocess.Popen([document_editor, note_path], creationflags=creationflags,
+        messagebox.showerror("OS Not Supported",
+                             "Your operating system is not supported")
+        return
+
+    subprocess.Popen([program, note_path], creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
 
@@ -186,7 +204,7 @@ class NoteBag:
     def open_note(self, note_name):
         note_filename = self.notes[note_name]
         note_path = os.path.join(self.notes_dir, note_filename)
-        open_note(self.document_editor, note_path)
+        open_note(note_path, self.document_editor)
 
     ## GUI Callbacks
     def note_name_action_callback(self, *_args, **_kwargs):
