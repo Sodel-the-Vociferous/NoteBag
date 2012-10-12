@@ -4,27 +4,25 @@ CONFIG_FILENAME = "NoteBag.ini"
 
 # For getting the config file
 import hashlib
-from helpers import get_called_script_dir, read_config
-import os.path
+from helpers import get_called_script_dir, read_config, save_config
+import os
 import pickle
 import string
 import subprocess
 import sys
-try:
-    from tkinter import messagebox
-except ImportError:
-    import tkMessageBox as messagebox
 
 try:
     # Widgets
     from tkinter import (Button, Entry, Frame, Label, Listbox,
-                     Scrollbar, Tk, StringVar)
+                         Scrollbar, Tk, StringVar)
+    from tkinter import messagebox, filedialog
     # Constants
     from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 except ImportError:
     # Widgets
     from Tkinter import (Button, Entry, Frame, Label, Listbox,
                          Scrollbar, Tk, StringVar)
+    import tkMessageBox as messagebox, FileDialog as filedialog
     # Constants
     from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
@@ -314,7 +312,41 @@ class NoteBag:
         self.load_notes_list()
         self.update_note_names_list()
 
+def maybe_first_time_setup():
+    config = read_config(CONFIG_FILENAME)
+    if config.get("NoteBag", "Notes Directory"):
+       return True
+
+    # Hide the main root window, and only show the dialogs.
+    root = Tk()
+    root.withdraw()
+
+    if not messagebox.askokcancel(
+            "NoteBag Setup",
+            "This is the first time you have run NoteBag\n"
+            "Please choose the folder where you would like NoteBag to keep your notes"
+            ):
+        root.destroy()
+        return False
+
+    notes_dir = filedialog.askdirectory(title="Notes Folder")
+    print(notes_dir)
+    if not notes_dir:
+        root.destroy()
+        return False
+
+    config.set("NoteBag", "Notes Directory", notes_dir)
+    save_config(config, CONFIG_FILENAME)
+    root.destroy()
+    return True
+
+
 if __name__ == "__main__":
+    if not maybe_first_time_setup():
+        print("Exiting: user refused to setup NoteBag")
+        exit(1)
+
+    # Create the main window
     root = Tk()
     root.title("NoteBag")
     notebag = NoteBag(root)
