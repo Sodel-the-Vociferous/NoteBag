@@ -1,10 +1,12 @@
 #!/usr/bin/python -B
 
+CONFIG_FILENAME = "NoteBag.ini"
+
 # For getting the config file
 import configparser
 import hashlib
+from helpers import get_called_script_dir, read_config
 import os.path
-from os.path import abspath, dirname, realpath
 import pickle
 import string
 from sys import argv
@@ -15,16 +17,6 @@ from tkinter import (Button, Entry, Frame, Label, Listbox,
 # Constants
 from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
-def get_script_dir():
-    return abspath(realpath(dirname(argv[0])))
-
-def read_config(filename):
-    config_dir = get_script_dir()
-    config_path = os.path.join(config_dir, filename)
-
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    return config
 
 def notes_checksum(notes):
     digest = hashlib.sha1()
@@ -54,6 +46,7 @@ class NoteBag:
     # Config Options
     notes_filename = None
     notes_dir = None
+    note_template_filename = None
 
     # GUI Elements
     note_name_action_strvar = None
@@ -62,18 +55,16 @@ class NoteBag:
     note_names_label_strvar = None
     note_names_listbox = None
 
-    # Class ("Static") Members
-    CONFIG_FILENAME = "NoteBag.ini"
-
     ## Back-End Methods
-    def load_config(self, filename):
-        config = self.config = read_config(self.CONFIG_FILENAME)
-        self.notes_filename = config.get("NoteBag", "Notes List File")
-        self.notes_dir = config.get("NoteBag", "Notes Directory")
 
     def load_notes(self, filename):
         notes_list_dir = get_script_dir()
         notes_list_file = os.path.join(notes_list_dir, filename)
+    def load_config(self):
+        config = self.config = read_config(CONFIG_FILENAME)
+        self.notes_list_filename = config.get("NoteBag", "Notes List File")
+        self.notes_dir = config.get("NoteBag", "Notes Directory")
+        self.note_template_filename = config.get("NoteBag", "Note Template Filename")
 
         # TODO handle exceptions
         if not os.path.isfile(notes_list_file):
@@ -213,8 +204,8 @@ class NoteBag:
         delete_note_button.pack(fill=X)
 
         ## Final Initialization
-        self.load_config(self.CONFIG_FILENAME)
         self.load_notes(self.notes_filename)
+        self.load_config()
         self.update_note_names_list()
 
 if __name__ == "__main__":
