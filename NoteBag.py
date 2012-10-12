@@ -340,34 +340,35 @@ def maybe_first_time_setup():
     if config.get("NoteBag", "Notes Directory"):
        return True
 
-    # Hide the main root window, and only show the dialogs.
-    root = Tk()
-    root.withdraw()
-
     if not messagebox.askokcancel(
             "NoteBag Setup",
-            "This is the first time you have run NoteBag\n"
-            "Please choose the folder where you would like NoteBag to keep your notes"
+            "Hi! It looks like this is your first time running NoteBag!\n"
+            "Please choose the folder where you would like NoteBag to keep your notes."
             ):
-        root.destroy()
         return False
 
     notes_dir = filedialog.askdirectory(title="Notes Folder")
     print(notes_dir)
     if not notes_dir:
-        root.destroy()
         return False
 
     config.set("NoteBag", "Notes Directory", notes_dir)
     save_config(config, CONFIG_FILENAME)
-    root.destroy()
     return True
 
 
 if __name__ == "__main__":
-    if not maybe_first_time_setup():
-        print("Exiting: user refused to setup NoteBag")
-        exit(1)
+    # Hide the main root window, and only show the dialogs.
+    root = Tk()
+    root.withdraw()
+    while not maybe_first_time_setup():
+        if not messagebox.askretrycancel(
+                "Try Again?",
+                "It looks like your first-time setup failed. Would you like to try setting up NoteBag again?"
+                ):
+            root.destroy()
+            exit(1)
+    root.destroy()
 
     # Create the main window
     root = Tk()
