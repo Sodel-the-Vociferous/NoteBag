@@ -20,20 +20,24 @@ from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
 def notes_checksum(notes):
     digest = hashlib.sha1()
-    for key in notes:
-        digest.update(key)
-        digest.update(notes[key])
+    for note_name in notes:
+        note_name_bytes = note_name.encode('utf-8')
+        filename_bytes = notes[note_name].encode('utf-8')
+        digest.update(note_name_bytes)
+        digest.update(filename_bytes)
     return digest.hexdigest()
 
-def save_notes_list(notes, file_obj):
-    pickle.dump(notes_checksum(notes), file_obj)
-    pickle.dump(notes, file_obj)
+def save_notes_list(notes, file_path):
+    with open(file_path, "wb") as f:
+        pickle.dump(notes_checksum(notes), f)
+        pickle.dump(notes, f)
 
-def read_notes_list(file_obj):
-    saved_checksum = pickle.load(file_obj)
-    notes = pickle.load(file_obj)
+def read_notes_list(file_path):
+    with open(file_path, "rb") as f:
+        saved_checksum = pickle.load(f)
+        notes = pickle.load(f)
+
     loaded_checksum = notes_checksum(notes)
-
     if loaded_checksum != saved_checksum:
         raise ValueError("The list of notes has been corrupted")
     return notes
@@ -56,25 +60,33 @@ class NoteBag:
     note_names_listbox = None
 
     ## Back-End Methods
+    def notes_list_path(self):
+        notes_list_dir = get_called_script_dir()
+        return os.path.join(notes_list_dir, self.notes_list_filename)
 
-    def load_notes(self, filename):
-        notes_list_dir = get_script_dir()
-        notes_list_file = os.path.join(notes_list_dir, filename)
+    def template_note_path(self):
+        notes_list_dir = get_called_script_dir()
+        return os.path.join(notes_list_dir, self.note_template_filename)
+
     def load_config(self):
         config = self.config = read_config(CONFIG_FILENAME)
         self.notes_list_filename = config.get("NoteBag", "Notes List File")
         self.notes_dir = config.get("NoteBag", "Notes Directory")
         self.note_template_filename = config.get("NoteBag", "Note Template Filename")
 
+    def load_notes_list(self):
         # TODO handle exceptions
-        if not os.path.isfile(notes_list_file):
+        notes_list_path = self.notes_list_path()
+        if not os.path.isfile(notes_list_path):
             self.notes = {}
             # TEST DATA
             # TODO remove
             self.notes = {"Foo": "bar.rtf"}
         else:
-            with open(notes_list_file) as f:
-                self.notes = read_notes_list(f)
+            self.notes = read_notes_list(notes_list_path)
+
+    def save_notes_list(self):
+        save_notes_list(self.notes, self.notes_list_path())
 
     def get_entered_note_name(self):
         return self.note_name_entry.get().strip()
@@ -204,8 +216,8 @@ class NoteBag:
         delete_note_button.pack(fill=X)
 
         ## Final Initialization
-        self.load_notes(self.notes_filename)
         self.load_config()
+        self.load_notes_list()
         self.update_note_names_list()
 
 if __name__ == "__main__":
