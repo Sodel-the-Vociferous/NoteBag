@@ -5,9 +5,9 @@
 My dad wanted a simple program to manage notes on his computer, so I
 wrote one.
 
-To run NoteBag, run NoteBag.py. The first time you run NoteBag, it
-will ask you to choose the folder where it will store all of the notes
-you create.
+NoteBag.py is the main NoteBag program to run. The first time you run
+NoteBag, it will ask you to choose the folder where it will store all
+of the notes you create.
 
 The "Note Name" text box is used to add new notes, and to
 automatically search through the notes you already have. If the "Note
