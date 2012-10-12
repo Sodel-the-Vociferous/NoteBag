@@ -3,7 +3,6 @@
 CONFIG_FILENAME = "NoteBag.ini"
 
 # For getting the config file
-import configparser
 import hashlib
 from helpers import get_called_script_dir, read_config
 import os.path
@@ -12,14 +11,22 @@ import string
 import subprocess
 import sys
 
+try:
+    # Widgets
+    from tkinter import (Button, Entry, Frame, Label, Listbox,
+                     Scrollbar, Tk, StringVar)
+    # Constants
+    from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
+except ImportError:
+    # Widgets
+    from Tkinter import (Button, Entry, Frame, Label, Listbox,
+                         Scrollbar, Tk, StringVar)
+    # Constants
+    from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
+
 if sys.platform.lower() == "nt":
     import win32process
 
-# Widgets
-from tkinter import (Button, Entry, Frame, Label, Listbox,
-                     Scrollbar, Tk, StringVar)
-# Constants
-from tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
 
 def notes_checksum(notes):

@@ -1,7 +1,10 @@
 ## Miscellaneous Helpful Functions
 # Written by Daniel Ralston
 
-import configparser
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import inspect
 import os.path
 from os.path import abspath, dirname, realpath
