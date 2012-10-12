@@ -42,6 +42,23 @@ def read_notes_list(file_path):
         raise ValueError("The list of notes has been corrupted")
     return notes
 
+def sanitize_note_name(note_name):
+    note_name = note_name.strip()
+    def okay_filename_char(c):
+        return c.lower() in "abcdefghijklmnopqrstuvwxyz .-_'"
+    return "".join(list(filter(okay_filename_char, tuple(note_name))))
+
+def create_skeleton_note(note_name, note_path, template_file_path):
+    with open(template_file_path) as tf:
+        template_lines = tf.readlines()
+    skeleton_lines = [line.replace("%(NOTE NAME)%", note_name)
+                      for line in template_lines]
+    skeleton_lines = [line.encode('utf-8') for line in skeleton_lines]
+
+    with open(note_path, 'wb') as f:
+        for line in skeleton_lines:
+            f.write(line)
+
 
 class NoteBag:
     config = None
@@ -100,6 +117,13 @@ class NoteBag:
                 return existing_note_name
         return None
 
+    def add_note(self, note_name, note_filename=None):
+        note_path = os.path.join(self.notes_dir, note_filename)
+        create_skeleton_note(note_name, note_path, self.template_note_path())
+
+        self.notes[note_name] = note_filename
+        self.save_notes_list()
+
     def update_note_names_list(self, search_str=""):
         note_names = self.notes.keys()
 
@@ -135,10 +159,15 @@ class NoteBag:
             #note_file = os.path.join(self.notes_dir, note_filename)
             #open_note(note_file)
         else:
-            # TODO ask the use if they really want to add a note,
-            # popup a small note setup dialog, and add the note.
-            pass
-        print("Bar")
+            # The note doesn't exist; create it.
+            # TODO ask the user if they really want to add a note,
+            # popup a small note setup dialog.
+
+            note_filename = sanitize_note_name(note_name)
+            self.add_note(note_name, note_filename)
+            self.clear_note_name_entry()
+            # TODO open new note
+            print("TODO: Open '{0}'".format(note_filename))
 
     def note_name_entry_changed(self, *_args, **_kwargs):
         entered_note_name = self.get_entered_note_name()
