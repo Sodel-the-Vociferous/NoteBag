@@ -2,7 +2,6 @@
 
 CONFIG_FILENAME = "NoteBag.ini"
 
-# For getting the config file
 import hashlib
 from helpers import get_called_script_dir, read_config, save_config
 import os

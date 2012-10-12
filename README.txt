@@ -15,8 +15,8 @@ The "Note Name" text box is used to add new notes, and to
 automatically search through the notes you already have. If the "Note
 Name" text box is empty, the bottom of the program window will list
 all of your existing notes. As you enter text into the "Note Name"
-text box, the bottom of the program window only show note names that
-contain the text you have typed.
+text box, the bottom of the program window will only show note names
+that contain the text you have typed.
 
 If you have typed the exact name of an existing note into the "Note
 Name" text box, and you hit the "Enter" key or the "Open" button,
