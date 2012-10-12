@@ -98,9 +98,6 @@ class NoteBag:
         notes_list_path = self.notes_list_path()
         if not os.path.isfile(notes_list_path):
             self.notes = {}
-            # TEST DATA
-            # TODO remove
-            self.notes = {"Foo": "bar.rtf"}
         else:
             self.notes = read_notes_list(notes_list_path)
 
