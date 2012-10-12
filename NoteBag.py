@@ -310,7 +310,7 @@ class NoteBag:
         key = self.get_note_name_key(note_name)
         if key:
             # The note exists; open it.
-            self.open_note(note_name)
+            self.open_note(key)
         else:
             # The note doesn't exist; create it.
             # TODO popup a small confirmation/note setup dialog.
