@@ -134,7 +134,7 @@ class NoteBag:
             note_names = filter(string_matches_search, note_names)
 
         # Sort Alphabetically
-        note_names = sorted(note_names, key=lambda s: s.lower)
+        note_names = sorted(note_names, key=lambda s: s.lower())
 
         # Update the note name listbox
         note_names_listbox = self.note_names_listbox
