@@ -1,4 +1,7 @@
-* NoteBag
+ ==       ==
+== NoteBag ==
+=============
+
 My dad wanted a simple program to manage notes on his computer, so I
 wrote one.
 
