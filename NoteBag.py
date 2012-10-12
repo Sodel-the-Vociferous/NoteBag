@@ -9,7 +9,11 @@ from helpers import get_called_script_dir, read_config
 import os.path
 import pickle
 import string
-from sys import argv
+import subprocess
+import sys
+
+if sys.platform.lower() == "nt":
+    import win32process
 
 # Widgets
 from tkinter import (Button, Entry, Frame, Label, Listbox,
@@ -58,6 +62,15 @@ def create_skeleton_note(note_name, note_path, template_file_path):
     with open(note_path, 'wb') as f:
         for line in skeleton_lines:
             f.write(line)
+
+def open_note(document_editor, note_path):
+    if sys.platform.lower() == "nt":
+        creationflags = win32process.DETACHED_PROCESS
+    else:
+        creationflags = 0
+    subprocess.Popen([document_editor, note_path], creationflags=creationflags,
+                     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE)
 
 
 class NoteBag:
@@ -146,25 +159,26 @@ class NoteBag:
             s = "All Existing Notes:"
         self.note_names_label_strvar.set(s)
 
+    def open_note(self, note_name):
+        note_filename = self.notes[note_name]
+        note_path = os.path.join(self.notes_dir, note_filename)
+        open_note(self.document_editor, note_path)
+
     ## GUI Callbacks
     def note_name_action_callback(self, *_args, **_kwargs):
         note_name = self.get_entered_note_name()
         key = self.get_note_name_key(note_name)
         if key:
             # The note exists; open it.
-            note_filename = self.notes[key]
-            # TODO open note
-            print("TODO: Open '{0}'".format(note_filename))
+            self.open_note(note_name)
         else:
             # The note doesn't exist; create it.
-            # TODO ask the user if they really want to add a note,
-            # popup a small note setup dialog.
-
-            note_filename = sanitize_note_name(note_name)
+            # TODO popup a small confirmation/note setup dialog.
+            note_filename = sanitize_note_name(note_name) + ".rtf"
             self.add_note(note_name, note_filename)
             self.clear_note_name_entry()
-            # TODO open new note
-            print("TODO: Open '{0}'".format(note_filename))
+            self.open_note(note_name)
+        self.clear_note_name_entry()
 
     def note_name_entry_changed(self, *_args, **_kwargs):
         entered_note_name = self.get_entered_note_name()
