@@ -99,6 +99,14 @@ class NoteBag:
         notes_list_dir = get_called_script_dir()
         return os.path.join(notes_list_dir, self.note_template_filename)
 
+    def get_listbox_selected_note_name(self):
+        selections = self.note_names_listbox.curselection()
+        if not selections:
+            return None
+        selection = selections[0]
+        note_name = self.note_names_listbox.get(selection)
+        return note_name
+
     def load_config(self):
         config = self.config = read_config(CONFIG_FILENAME)
         self.notes_list_filename = config.get("NoteBag", "Notes List File")
@@ -192,6 +200,14 @@ class NoteBag:
     def clear_note_name_entry(self):
         self.note_name_entry.delete(0, END)
 
+    def open_note_from_listbox(self, *_args, **_kwargs):
+        note_name = self.get_listbox_selected_note_name()
+        if not note_name:
+            # TODO show a warning dialog box or something
+            print("Silly Wretch Error: You must pick one first!")
+            return
+        self.open_note(note_name)
+
     ## Main Code
     def __init__(self, master):
         ## High-level Layout
@@ -237,6 +253,9 @@ class NoteBag:
 
         note_names_listbox = self.note_names_listbox = Listbox(notes_frame)
         note_names_listbox.pack(side=LEFT, fill=BOTH, expand=True)
+        note_names_listbox.bind("<Return>", self.open_note_from_listbox)
+        note_names_listbox.bind("<KP_Enter>", self.open_note_from_listbox)
+        note_names_listbox.bind("<Double-Button-1>", self.open_note_from_listbox)
 
         # Add scrollbar to list of notes
         notes_scrollbar = Scrollbar(notes_frame)
@@ -248,7 +267,8 @@ class NoteBag:
         note_controls = Frame(notes_frame)
         note_controls.pack(side=LEFT, fill=Y)
 
-        open_note_button = Button(note_controls, text="Open")
+        open_note_button = Button(note_controls, text="Open",
+                                  command=self.open_note_from_listbox)
         open_note_button.pack(fill=X)
 
         delete_note_button = Button(note_controls, text="Delete")
