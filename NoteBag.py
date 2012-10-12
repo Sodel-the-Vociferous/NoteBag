@@ -302,5 +302,6 @@ class NoteBag:
 
 if __name__ == "__main__":
     root = Tk()
+    root.title("NoteBag")
     notebag = NoteBag(root)
     root.mainloop()
