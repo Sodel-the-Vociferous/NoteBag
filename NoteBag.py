@@ -113,7 +113,6 @@ class NoteBag:
         note_names = map(lambda s: s.lower(), note_names)
         for existing_note_name in note_names:
             if note_name.lower() == existing_note_name:
-                print("Wee!")
                 return existing_note_name
         return None
 
@@ -154,10 +153,10 @@ class NoteBag:
         note_name = self.get_entered_note_name()
         key = self.get_note_name_key(note_name)
         if key:
+            # The note exists; open it.
             note_filename = self.notes[key]
-            # TODO
-            #note_file = os.path.join(self.notes_dir, note_filename)
-            #open_note(note_file)
+            # TODO open note
+            print("TODO: Open '{0}'".format(note_filename))
         else:
             # The note doesn't exist; create it.
             # TODO ask the user if they really want to add a note,
@@ -227,10 +226,9 @@ class NoteBag:
         note_names_listbox = self.note_names_listbox = Listbox(notes_frame)
         note_names_listbox.pack(side=LEFT, fill=BOTH, expand=True)
 
+        # Add scrollbar to list of notes
         notes_scrollbar = Scrollbar(notes_frame)
         notes_scrollbar.pack(side=LEFT, fill=Y)
-
-        # Link scrollbar to list of notes
         note_names_listbox.config(yscrollcommand=notes_scrollbar.set)
         notes_scrollbar.config(command=note_names_listbox.yview)
 
