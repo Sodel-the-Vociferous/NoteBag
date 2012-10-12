@@ -27,6 +27,7 @@ except ImportError:
 if sys.platform.lower() == "nt":
     import win32process
 
+PICKLE_PROTOCOL = 2
 
 
 def notes_checksum(notes):
@@ -40,8 +41,8 @@ def notes_checksum(notes):
 
 def save_notes_list(notes, file_path):
     with open(file_path, "wb") as f:
-        pickle.dump(notes_checksum(notes), f)
-        pickle.dump(notes, f)
+        pickle.dump(notes_checksum(notes), f, PICKLE_PROTOCOL)
+        pickle.dump(notes, f, PICKLE_PROTOCOL)
 
 def read_notes_list(file_path):
     with open(file_path, "rb") as f:
