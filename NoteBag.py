@@ -10,6 +10,10 @@ import pickle
 import string
 import subprocess
 import sys
+try:
+    import messagebox
+except ImportError:
+    import tkMessageBox as messagebox
 
 try:
     # Widgets
@@ -218,17 +222,19 @@ class NoteBag:
         note_name = self.get_listbox_selected_note_name()
         if not note_name:
             # TODO show a warning dialog box or something
-            print("Silly Wretch Error: You must pick one first!")
+            messagebox.showwarning("Error", "Can't Open: No note selected")
             return
         self.open_note(note_name)
 
     def delete_note_from_listbox(self, *_args, **_kwargs):
         note_name = self.get_listbox_selected_note_name()
         if not note_name:
-            # TODO show a warning dialog box or something
-            print("Silly Wretch Error: You must pick one first!")
+            messagebox.showwarning("Error", "Can't Delete: No note selected")
             return
-        # TODO show warning/confirmation dialog
+        if not messagebox.askyesno("Really Delete Note?",
+                                   "WARNING: This will remove the note document file from your hard drive! You cannot undo this!\n\nReally remove '{0}'?".format(note_name),
+                                   icon=messagebox.ERROR):
+            return
 
         note_path = self.note_path(note_name)
         del(self.notes[note_name])
