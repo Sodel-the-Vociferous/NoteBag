@@ -99,6 +99,11 @@ class NoteBag:
         notes_list_dir = get_called_script_dir()
         return os.path.join(notes_list_dir, self.note_template_filename)
 
+    def note_path(self, note_name):
+        note_filename = self.notes[note_name]
+        note_path = os.path.join(self.notes_dir, note_filename)
+        return note_path
+
     def get_listbox_selected_note_name(self):
         selections = self.note_names_listbox.curselection()
         if not selections:
@@ -209,6 +214,20 @@ class NoteBag:
             return
         self.open_note(note_name)
 
+    def delete_note_from_listbox(self, *_args, **_kwargs):
+        note_name = self.get_listbox_selected_note_name()
+        if not note_name:
+            # TODO show a warning dialog box or something
+            print("Silly Wretch Error: You must pick one first!")
+            return
+        # TODO show warning/confirmation dialog
+
+        note_path = self.note_path(note_name)
+        del(self.notes[note_name])
+        self.save_notes_list()
+        os.remove(note_path)
+        self.update_note_names_list()
+
     ## Main Code
     def __init__(self, master):
         ## High-level Layout
@@ -272,7 +291,8 @@ class NoteBag:
                                   command=self.open_note_from_listbox)
         open_note_button.pack(fill=X)
 
-        delete_note_button = Button(note_controls, text="Delete")
+        delete_note_button = Button(note_controls, text="Delete",
+                                    command=self.delete_note_from_listbox)
         delete_note_button.pack(fill=X)
 
         ## Final Initialization
