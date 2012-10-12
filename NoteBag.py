@@ -26,7 +26,7 @@ except ImportError:
     # Constants
     from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
-if sys.platform.lower() == "nt":
+if os.name.lower() == "nt":
     import win32process
 
 PICKLE_PROTOCOL = 2
