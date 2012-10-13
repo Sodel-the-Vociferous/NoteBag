@@ -23,13 +23,11 @@ except ImportError:
     # Widgets
     from Tkinter import (Button, Entry, Frame, Label, Listbox,
                          Scrollbar, Tk, StringVar)
-    import tkMessageBox as messagebox, FileDialog as filedialog
+    import tkMessageBox as messagebox, tkFileDialog as filedialog
     # Constants
     from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
-if os.name.lower() == "nt":
-    import win32process
-
+## GLOBAL VARS
 # A common-denominator between Python 2.x and 3.x
 PICKLE_PROTOCOL = 2
 
@@ -111,13 +109,14 @@ def open_note(note_path, document_editor=None):
 
     # Choose the document editor and Popen() settings based on the
     # operating system.
-    #
-    # This is SUPER UGLY.
     creationflags = 0
     if document_editor:
         program = document_editor
     elif os.name.lower() == "nt":
-        creationflags |= win32process.DETACHED_PROCESS
+        # I'm not using the win32process library, so I can't just
+        # import DETACHED_PROCESS from there.
+        DETACHED_PROCESS = 0x8
+        creationflags |= DETACHED_PROCESS
         program = "start"
     elif sys.platform.lower() == "darwin":
         # Mac OSX
@@ -151,48 +150,10 @@ class NoteBag:
     note_names_label_strvar = None
     note_names_listbox = None
 
-    ## Back-End Methods
-    def notes_list_path(self):
-        """
-        Return the path to the notes list file.
-        """
-
-        notes_list_dir = get_called_script_dir()
-        return os.path.join(notes_list_dir, self.notes_list_filename)
-
-    def template_note_path(self):
-        """
-        Return the path to the template note file.
-        """
-
-        notes_list_dir = get_called_script_dir()
-        return os.path.join(notes_list_dir, self.note_template_filename)
-
-    def note_path(self, note_name):
-        """
-        Return the path to an existing note document.
-        """
-
-        note_filename = self.notes[note_name]
-        note_path = os.path.join(self.notes_dir, note_filename)
-        return note_path
-
-    def get_listbox_selected_note_name(self):
-        """
-        Return the note name that is selected in the listbox; if there
-        is no selection, return None.
-        """
-
-        selections = self.note_names_listbox.curselection()
-        if not selections:
-            return None
-        selection = selections[0]
-        note_name = self.note_names_listbox.get(selection)
-        return note_name
-
+    ## Config/Init Methods
     def load_config(self):
         """
-        Load a config file, and use it to set config options.
+        Load NoteBag's config file, and use it to set config options.
         """
 
         config = self.config = read_config(CONFIG_FILENAME)
@@ -200,6 +161,12 @@ class NoteBag:
         self.notes_dir = config.get("NoteBag", "Notes Directory")
         self.note_template_filename = config.get("NoteBag", "Note Template Filename")
         self.document_editor = config.get("NoteBag", "Document Editor")
+
+    def save_config(self):
+        """
+        Save NoteBag's current configuration to its config file.
+        """
+        save_config(self.config, CONFIG_FILENAME)
 
     def load_notes_list(self):
         """
@@ -220,6 +187,79 @@ class NoteBag:
 
         save_notes_list(self.notes, self.notes_list_path())
 
+    ## Back-End Methods
+    def notes_list_path(self):
+        """
+        Return the path to the notes list file.
+        """
+
+        return os.path.join(self.notes_dir, self.notes_list_filename)
+
+    def template_note_path(self):
+        """
+        Return the path to the template note file.
+        """
+
+        return os.path.join(get_called_script_dir(), self.note_template_filename)
+
+    def note_filename_exists(self, filename):
+        """
+        If a note filename already exists case-insensitively, return
+        the proper filename from self.notes.
+        """
+
+        for existing in self.notes.values():
+            if filename.lower() == existing.lower():
+                return existing
+        return False
+
+    def note_name_exists(self, note_name):
+        """
+        If the given note name matches an existing note name
+        case-insensitively, return the "proper" note name from
+        self.notes; if the given note name does not exist, return
+        None.
+        """
+        note_names = self.notes.keys()
+        for existing_note_name in note_names:
+            if note_name.lower() == existing_note_name.lower():
+                return existing_note_name
+        return None
+
+    def get_note_path(self, note_name):
+        """
+        Return the path to an existing note document.
+        """
+
+        note_filename = self.notes[note_name]
+        note_path = os.path.join(self.notes_dir, note_filename)
+        return note_path
+
+    def new_note_filename(self, note_name):
+        filename_base = sanitize_note_name(note_name)
+        filename = filename_base + ".rtf"
+        if not self.note_filename_exists(filename):
+            return filename
+
+        suffix_num = 2
+        while self.note_filename_exists(filename):
+            filename = "{0}-{1}.rtf".format(filename_base, str(suffix_num))
+            suffix_num += 1
+        return filename
+
+    def get_listbox_selected_note_name(self):
+        """
+        Return the note name that is selected in the listbox; if there
+        is no selection, return None.
+        """
+
+        selections = self.note_names_listbox.curselection()
+        if not selections:
+            return None
+        selection = selections[0]
+        note_name = self.note_names_listbox.get(selection)
+        return note_name
+
     def get_entered_note_name(self):
         """
         Get the text that has been entered into the "Note Name" text
@@ -228,17 +268,13 @@ class NoteBag:
 
         return self.note_name_entry.get().strip("\t ")
 
-    def get_note_name_key(self, note_name):
-        note_names = self.notes.keys()
-        for existing_note_name in note_names:
-            if note_name.lower() == existing_note_name.lower():
-                return existing_note_name
-        return None
-
     def add_note(self, note_name, note_filename=None):
         """
         Add a note document, and save the list of notes.
         """
+
+        if not note_filename:
+            note_filename = self.new_note_filename(note_name)
 
         note_path = os.path.join(self.notes_dir, note_filename)
         create_skeleton_note(note_name, note_path, self.template_note_path())
@@ -306,15 +342,14 @@ class NoteBag:
             messagebox.showwarning("Error", "Can't add note: no note name entered")
             return
 
-        key = self.get_note_name_key(note_name)
+        key = self.note_name_exists(note_name)
         if key:
             # The note exists; open it.
             self.open_note(key)
         else:
             # The note doesn't exist; create it.
             # TODO popup a small confirmation/note setup dialog.
-            note_filename = sanitize_note_name(note_name) + ".rtf"
-            self.add_note(note_name, note_filename)
+            self.add_note(note_name)
             self.clear_note_name_entry()
             self.open_note(note_name)
         self.clear_note_name_entry()
@@ -329,7 +364,7 @@ class NoteBag:
         self.update_note_names_list()
 
         entered_note_name = self.get_entered_note_name()
-        if self.get_note_name_key(entered_note_name):
+        if self.note_name_exists(entered_note_name):
             self.note_name_action_strvar.set("Open")
         else:
             self.note_name_action_strvar.set("Add")
@@ -370,7 +405,7 @@ class NoteBag:
                                    icon=messagebox.ERROR):
             return
 
-        note_path = self.note_path(note_name)
+        note_path = self.get_note_path(note_name)
         del(self.notes[note_name])
         self.save_notes_list()
         os.remove(note_path)
