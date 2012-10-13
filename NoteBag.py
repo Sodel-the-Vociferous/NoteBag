@@ -23,13 +23,11 @@ except ImportError:
     # Widgets
     from Tkinter import (Button, Entry, Frame, Label, Listbox,
                          Scrollbar, Tk, StringVar)
-    import tkMessageBox as messagebox, FileDialog as filedialog
+    import tkMessageBox as messagebox, tkFileDialog as filedialog
     # Constants
     from Tkinter import BOTH, BOTTOM, END, LEFT, N, S, W, E, X, Y
 
-if os.name.lower() == "nt":
-    import win32process
-
+## GLOBAL VARS
 # A common-denominator between Python 2.x and 3.x
 PICKLE_PROTOCOL = 2
 
@@ -111,13 +109,14 @@ def open_note(note_path, document_editor=None):
 
     # Choose the document editor and Popen() settings based on the
     # operating system.
-    #
-    # This is SUPER UGLY.
     creationflags = 0
     if document_editor:
         program = document_editor
     elif os.name.lower() == "nt":
-        creationflags |= win32process.DETACHED_PROCESS
+        # I'm not using the win32process library, so I can't just
+        # import DETACHED_PROCESS from there.
+        DETACHED_PROCESS = 0x8
+        creationflags |= DETACHED_PROCESS
         program = "start"
     elif sys.platform.lower() == "darwin":
         # Mac OSX
