@@ -165,6 +165,17 @@ class NoteBag:
 
         return os.path.join(get_called_script_dir(), self.note_template_filename)
 
+    def note_filename_exists(self, filename):
+        """
+        If a note filename already exists case-insensitively, return
+        the proper filename from self.notes.
+        """
+
+        for existing in self.notes.values():
+            if filename.lower() == existing.lower():
+                return existing
+        return False
+
     def note_name_exists(self, note_name):
         """
         If the given note name matches an existing note name
@@ -186,6 +197,18 @@ class NoteBag:
         note_filename = self.notes[note_name]
         note_path = os.path.join(self.notes_dir, note_filename)
         return note_path
+
+    def new_note_filename(self, note_name):
+        filename_base = sanitize_note_name(note_name)
+        filename = filename_base + ".rtf"
+        if not self.note_filename_exists(filename):
+            return filename
+
+        suffix_num = 2
+        while self.note_filename_exists(filename):
+            filename = "{0}-{1}.rtf".format(filename_base, str(suffix_num))
+            suffix_num += 1
+        return filename
 
     def get_listbox_selected_note_name(self):
         """
@@ -242,6 +265,9 @@ class NoteBag:
         """
         Add a note document, and save the list of notes.
         """
+
+        if not note_filename:
+            note_filename = self.new_note_filename(note_name)
 
         note_path = os.path.join(self.notes_dir, note_filename)
         create_skeleton_note(note_name, note_path, self.template_note_path())
@@ -316,8 +342,7 @@ class NoteBag:
         else:
             # The note doesn't exist; create it.
             # TODO popup a small confirmation/note setup dialog.
-            note_filename = sanitize_note_name(note_name) + ".rtf"
-            self.add_note(note_name, note_filename)
+            self.add_note(note_name)
             self.clear_note_name_entry()
             self.open_note(note_name)
         self.clear_note_name_entry()
