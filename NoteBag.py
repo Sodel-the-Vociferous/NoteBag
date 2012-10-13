@@ -165,7 +165,20 @@ class NoteBag:
 
         return os.path.join(get_called_script_dir(), self.note_template_filename)
 
-    def note_path(self, note_name):
+    def note_name_exists(self, note_name):
+        """
+        If the given note name matches an existing note name
+        case-insensitively, return the "proper" note name from
+        self.notes; if the given note name does not exist, return
+        None.
+        """
+        note_names = self.notes.keys()
+        for existing_note_name in note_names:
+            if note_name.lower() == existing_note_name.lower():
+                return existing_note_name
+        return None
+
+    def get_note_path(self, note_name):
         """
         Return the path to an existing note document.
         """
@@ -224,13 +237,6 @@ class NoteBag:
         """
 
         return self.note_name_entry.get().strip("\t ")
-
-    def get_note_name_key(self, note_name):
-        note_names = self.notes.keys()
-        for existing_note_name in note_names:
-            if note_name.lower() == existing_note_name.lower():
-                return existing_note_name
-        return None
 
     def add_note(self, note_name, note_filename=None):
         """
@@ -303,7 +309,7 @@ class NoteBag:
             messagebox.showwarning("Error", "Can't add note: no note name entered")
             return
 
-        key = self.get_note_name_key(note_name)
+        key = self.note_name_exists(note_name)
         if key:
             # The note exists; open it.
             self.open_note(key)
@@ -326,7 +332,7 @@ class NoteBag:
         self.update_note_names_list()
 
         entered_note_name = self.get_entered_note_name()
-        if self.get_note_name_key(entered_note_name):
+        if self.note_name_exists(entered_note_name):
             self.note_name_action_strvar.set("Open")
         else:
             self.note_name_action_strvar.set("Add")
@@ -367,7 +373,7 @@ class NoteBag:
                                    icon=messagebox.ERROR):
             return
 
-        note_path = self.note_path(note_name)
+        note_path = self.get_note_path(note_name)
         del(self.notes[note_name])
         self.save_notes_list()
         os.remove(note_path)
