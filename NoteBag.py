@@ -163,8 +163,7 @@ class NoteBag:
         Return the path to the template note file.
         """
 
-        notes_list_dir = get_called_script_dir()
-        return os.path.join(notes_list_dir, self.note_template_filename)
+        return os.path.join(get_called_script_dir(), self.note_template_filename)
 
     def note_path(self, note_name):
         """
