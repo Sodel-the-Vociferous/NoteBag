@@ -2,7 +2,6 @@
 
 * Tasks
   - [ ] Rename Notes
-  - [ ] Store note list in note directory
   - [ ] Note properties menu
   - [ ] Customize default font size
   - [ ] Insert today's date at the bottom of the file
