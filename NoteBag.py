@@ -150,6 +150,43 @@ class NoteBag:
     note_names_label_strvar = None
     note_names_listbox = None
 
+    ## Config/Init Methods
+    def load_config(self):
+        """
+        Load NoteBag's config file, and use it to set config options.
+        """
+
+        config = self.config = read_config(CONFIG_FILENAME)
+        self.notes_list_filename = config.get("NoteBag", "Notes List File")
+        self.notes_dir = config.get("NoteBag", "Notes Directory")
+        self.note_template_filename = config.get("NoteBag", "Note Template Filename")
+        self.document_editor = config.get("NoteBag", "Document Editor")
+
+    def save_config(self):
+        """
+        Save NoteBag's current configuration to its config file.
+        """
+        save_config(self.config, CONFIG_FILENAME)
+
+    def load_notes_list(self):
+        """
+        Load the list of notes.
+        """
+
+        # TODO handle exceptions
+        notes_list_path = self.notes_list_path()
+        if not os.path.isfile(notes_list_path):
+            self.notes = {}
+        else:
+            self.notes = read_notes_list(notes_list_path)
+
+    def save_notes_list(self):
+        """
+        Save the list of notes.
+        """
+
+        save_notes_list(self.notes, self.notes_list_path())
+
     ## Back-End Methods
     def notes_list_path(self):
         """
@@ -222,36 +259,6 @@ class NoteBag:
         selection = selections[0]
         note_name = self.note_names_listbox.get(selection)
         return note_name
-
-    def load_config(self):
-        """
-        Load a config file, and use it to set config options.
-        """
-
-        config = self.config = read_config(CONFIG_FILENAME)
-        self.notes_list_filename = config.get("NoteBag", "Notes List File")
-        self.notes_dir = config.get("NoteBag", "Notes Directory")
-        self.note_template_filename = config.get("NoteBag", "Note Template Filename")
-        self.document_editor = config.get("NoteBag", "Document Editor")
-
-    def load_notes_list(self):
-        """
-        Load the list of notes.
-        """
-
-        # TODO handle exceptions
-        notes_list_path = self.notes_list_path()
-        if not os.path.isfile(notes_list_path):
-            self.notes = {}
-        else:
-            self.notes = read_notes_list(notes_list_path)
-
-    def save_notes_list(self):
-        """
-        Save the list of notes.
-        """
-
-        save_notes_list(self.notes, self.notes_list_path())
 
     def get_entered_note_name(self):
         """
