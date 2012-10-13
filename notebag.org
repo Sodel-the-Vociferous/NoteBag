@@ -2,8 +2,6 @@
 
 * Tasks
   - [ ] Rename Notes
-  - [ ] Handle different note names that may sanitize the same way
-    - File conflict! D:
   - [ ] Store note list in note directory
   - [ ] Note properties menu
   - [ ] Customize default font size
