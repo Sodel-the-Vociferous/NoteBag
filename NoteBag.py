@@ -527,6 +527,9 @@ def maybe_first_time_setup():
 
 
 if __name__ == "__main__":
+    print("NoteBag {0}".format(__version__))
+    print("Copyright (C) {0}".format(__copyright__))
+
     # Hide the main root window, and only show the dialogs.
     root = Tk()
     root.withdraw()
