@@ -341,7 +341,6 @@ class NoteBag:
         """
 
         note_name = self.get_entered_note_name()
-        note_name = sanitize_note_name(note_name)
         if not note_name:
             messagebox.showwarning("Error", "Can't add note: no note name entered")
             return
