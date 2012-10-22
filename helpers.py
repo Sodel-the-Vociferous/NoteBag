@@ -38,6 +38,10 @@ def read_config(filename):
     return config
 
 def save_config(config, filename):
+    """
+    Save a configparser configuration to <filename>, in the same
+    directory as the top-level running script.
+    """
     config_dir = get_called_script_dir()
     config_path = os.path.join(config_dir, filename)
     with open(config_path, 'w') as f:
