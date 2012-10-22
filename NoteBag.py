@@ -83,7 +83,7 @@ def sanitize_note_name(note_name):
 
     note_name = note_name.strip()
     def okay_filename_char(c):
-        return c.lower() in "abcdefghijklmnopqrstuvwxyz .-_'"
+        return c.lower() in "abcdefghijklmnopqrstuvwxyz.-_"
     return "".join(list(filter(okay_filename_char, tuple(note_name))))
 
 def create_skeleton_note(note_name, note_path, template_file_path):
@@ -110,28 +110,33 @@ def open_note(note_path, document_editor=None):
     program for the file type.
     """
 
+    if not os.path.isfile(note_path):
+        raise EnvironmentError("File {0} doesn't exist".format(note_path))
+
     # Choose the document editor and Popen() settings based on the
     # operating system.
     creationflags = 0
     if document_editor:
-        program = document_editor
+        program = [os.path.expandvars(document_editor)]
     elif os.name.lower() == "nt":
         # I'm not using the win32process library, so I can't just
         # import DETACHED_PROCESS from there.
         DETACHED_PROCESS = 0x8
         creationflags |= DETACHED_PROCESS
-        program = "start"
+        program = ["cmd", "/c", "start"]
     elif sys.platform.lower() == "darwin":
         # Mac OSX
-        program = "open"
+        program = ["open"]
     elif os.name.lower() == "posix":
-        program = "xdg-open"
+        program = ["xdg-open"]
     else:
         messagebox.showerror("OS Not Supported",
                              "Your operating system is not supported")
         return
 
-    subprocess.Popen([program, note_path], creationflags=creationflags,
+    cmd = program + [note_path]
+    print(cmd)
+    subprocess.Popen(cmd, creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
 
