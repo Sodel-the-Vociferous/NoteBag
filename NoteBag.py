@@ -1,5 +1,9 @@
 #!/usr/bin/python -B
 
+__author__ = "Daniel Ralston"
+__copyright__ = "2012, Daniel Ralston"
+__version__ = "0.1.0"
+
 import hashlib
 import os
 import pickle
