@@ -1,14 +1,15 @@
 #!/usr/bin/python -B
 
-CONFIG_FILENAME = "NoteBag.ini"
-
 import hashlib
-from helpers import get_called_script_dir, read_config, save_config
 import os
 import pickle
+import shutil
 import string
 import subprocess
 import sys # for platform
+
+from helpers import (get_called_script_dir, get_config_path,
+                     read_config, save_config)
 
 # Compensate for Python 2.x and 3.x having different module names, and
 # no good way to make the same imports work on both.
@@ -29,6 +30,8 @@ except ImportError:
 
 ## GLOBAL VARS
 # A common-denominator between Python 2.x and 3.x
+CONFIG_FILENAME = "NoteBag.ini"
+TEMPLATE_CONFIG_FILENAME = "Template-NoteBag.ini"
 PICKLE_PROTOCOL = 2
 
 
@@ -166,6 +169,7 @@ class NoteBag:
         """
         Save NoteBag's current configuration to its config file.
         """
+
         save_config(self.config, CONFIG_FILENAME)
 
     def load_notes_list(self):
@@ -488,6 +492,10 @@ def maybe_first_time_setup():
     Set up the user's notes directory/folder the first time they run
     NoteBag.
     """
+
+    if not os.path.isfile(get_config_path(CONFIG_FILENAME)):
+        shutil.copy2(get_config_path(TEMPLATE_CONFIG_FILENAME),
+                     get_config_path(CONFIG_FILENAME))
 
     config = read_config(CONFIG_FILENAME)
     if config.get("NoteBag", "Notes Directory"):
