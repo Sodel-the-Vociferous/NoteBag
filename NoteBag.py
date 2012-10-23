@@ -1,14 +1,19 @@
 #!/usr/bin/python -B
 
-CONFIG_FILENAME = "NoteBag.ini"
+__author__ = "Daniel Ralston"
+__copyright__ = "2012, Daniel Ralston"
+__version__ = "0.1.0"
 
 import hashlib
-from helpers import get_called_script_dir, read_config, save_config
 import os
 import pickle
+import shutil
 import string
 import subprocess
 import sys # for platform
+
+from helpers import (get_called_script_dir, get_config_path,
+                     read_config, save_config)
 
 # Compensate for Python 2.x and 3.x having different module names, and
 # no good way to make the same imports work on both.
@@ -29,6 +34,8 @@ except ImportError:
 
 ## GLOBAL VARS
 # A common-denominator between Python 2.x and 3.x
+CONFIG_FILENAME = "NoteBag.ini"
+TEMPLATE_CONFIG_FILENAME = "Template-NoteBag.ini"
 PICKLE_PROTOCOL = 2
 
 
@@ -80,7 +87,7 @@ def sanitize_note_name(note_name):
 
     note_name = note_name.strip()
     def okay_filename_char(c):
-        return c.lower() in "abcdefghijklmnopqrstuvwxyz .-_'"
+        return c.lower() in "abcdefghijklmnopqrstuvwxyz.-_"
     return "".join(list(filter(okay_filename_char, tuple(note_name))))
 
 def create_skeleton_note(note_name, note_path, template_file_path):
@@ -107,28 +114,33 @@ def open_note(note_path, document_editor=None):
     program for the file type.
     """
 
+    if not os.path.isfile(note_path):
+        raise EnvironmentError("File {0} doesn't exist".format(note_path))
+
     # Choose the document editor and Popen() settings based on the
     # operating system.
     creationflags = 0
     if document_editor:
-        program = document_editor
+        program = [os.path.expandvars(document_editor)]
     elif os.name.lower() == "nt":
         # I'm not using the win32process library, so I can't just
         # import DETACHED_PROCESS from there.
         DETACHED_PROCESS = 0x8
         creationflags |= DETACHED_PROCESS
-        program = "start"
+        program = ["cmd", "/c", "start"]
     elif sys.platform.lower() == "darwin":
         # Mac OSX
-        program = "open"
+        program = ["open"]
     elif os.name.lower() == "posix":
-        program = "xdg-open"
+        program = ["xdg-open"]
     else:
         messagebox.showerror("OS Not Supported",
                              "Your operating system is not supported")
         return
 
-    subprocess.Popen([program, note_path], creationflags=creationflags,
+    cmd = program + [note_path]
+    print(cmd)
+    subprocess.Popen(cmd, creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
 
@@ -166,6 +178,7 @@ class NoteBag:
         """
         Save NoteBag's current configuration to its config file.
         """
+
         save_config(self.config, CONFIG_FILENAME)
 
     def load_notes_list(self):
@@ -337,7 +350,6 @@ class NoteBag:
         """
 
         note_name = self.get_entered_note_name()
-        note_name = sanitize_note_name(note_name)
         if not note_name:
             messagebox.showwarning("Error", "Can't add note: no note name entered")
             return
@@ -489,6 +501,10 @@ def maybe_first_time_setup():
     NoteBag.
     """
 
+    if not os.path.isfile(get_config_path(CONFIG_FILENAME)):
+        shutil.copy2(get_config_path(TEMPLATE_CONFIG_FILENAME),
+                     get_config_path(CONFIG_FILENAME))
+
     config = read_config(CONFIG_FILENAME)
     if config.get("NoteBag", "Notes Directory"):
        return True
@@ -511,6 +527,9 @@ def maybe_first_time_setup():
 
 
 if __name__ == "__main__":
+    print("NoteBag {0}".format(__version__))
+    print("Copyright (C) {0}".format(__copyright__))
+
     # Hide the main root window, and only show the dialogs.
     root = Tk()
     root.withdraw()
