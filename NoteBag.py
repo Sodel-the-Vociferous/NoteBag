@@ -139,7 +139,6 @@ def open_note(note_path, document_editor=None):
         return
 
     cmd = program + [note_path]
-    print(cmd)
     subprocess.Popen(cmd, creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
