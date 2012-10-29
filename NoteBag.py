@@ -534,10 +534,10 @@ if __name__ == "__main__":
     root = Tk()
     root.withdraw()
     while not maybe_first_time_setup():
-        if not messagebox.askretrycancel(
+        success = messagebox.askretrycancel(
                 "Try Again?",
-                "It looks like your first-time setup failed. Would you like to try setting up NoteBag again?"
-                ):
+                "It looks like your first-time setup failed. Would you like to try setting up NoteBag again?")
+        if not success:
             root.destroy()
             exit(1)
     root.destroy()
