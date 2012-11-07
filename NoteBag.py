@@ -139,7 +139,6 @@ def open_note(note_path, document_editor=None):
         return
 
     cmd = program + [note_path]
-    print(cmd)
     subprocess.Popen(cmd, creationflags=creationflags,
                      stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE)
@@ -233,6 +232,7 @@ class NoteBag:
         self.notes; if the given note name does not exist, return
         None.
         """
+
         note_names = self.notes.keys()
         for existing_note_name in note_names:
             if note_name.lower() == existing_note_name.lower():
@@ -249,6 +249,14 @@ class NoteBag:
         return note_path
 
     def new_note_filename(self, note_name):
+        """
+        Return an unused filename appropriate for the given note name.
+
+        Note filenames are .rtf files. All "un-kosher" characters are
+        stripped out of the note name, so the filesystem doesn't choke
+        on them.
+        """
+
         filename_base = sanitize_note_name(note_name)
         filename = filename_base + ".rtf"
         if not self.note_filename_exists(filename):
@@ -499,6 +507,9 @@ def maybe_first_time_setup():
     """
     Set up the user's notes directory/folder the first time they run
     NoteBag.
+
+    Returns False if it failed, or needs to try again; returns True if
+    it succeeds, or doesn't need to happen at all.
     """
 
     if not os.path.isfile(get_config_path(CONFIG_FILENAME)):
@@ -534,10 +545,10 @@ if __name__ == "__main__":
     root = Tk()
     root.withdraw()
     while not maybe_first_time_setup():
-        if not messagebox.askretrycancel(
+        success = messagebox.askretrycancel(
                 "Try Again?",
-                "It looks like your first-time setup failed. Would you like to try setting up NoteBag again?"
-                ):
+                "It looks like your first-time setup failed. Would you like to try setting up NoteBag again?")
+        if not success:
             root.destroy()
             exit(1)
     root.destroy()

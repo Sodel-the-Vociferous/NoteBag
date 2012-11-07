@@ -1,8 +1,0 @@
-#+FILETAGS: personal notebag
-
-* Tasks
-  - [ ] Rename Notes
-  - [ ] Note properties menu
-  - [ ] Customize default font size
-  - [ ] Insert today's date at the bottom of the file
-  - [ ] Password protect
