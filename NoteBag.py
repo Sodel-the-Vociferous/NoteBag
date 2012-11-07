@@ -232,6 +232,7 @@ class NoteBag:
         self.notes; if the given note name does not exist, return
         None.
         """
+
         note_names = self.notes.keys()
         for existing_note_name in note_names:
             if note_name.lower() == existing_note_name.lower():
@@ -248,6 +249,14 @@ class NoteBag:
         return note_path
 
     def new_note_filename(self, note_name):
+        """
+        Return an unused filename appropriate for the given note name.
+
+        Note filenames are .rtf files. All "un-kosher" characters are
+        stripped out of the note name, so the filesystem doesn't choke
+        on them.
+        """
+
         filename_base = sanitize_note_name(note_name)
         filename = filename_base + ".rtf"
         if not self.note_filename_exists(filename):
