@@ -507,6 +507,9 @@ def maybe_first_time_setup():
     """
     Set up the user's notes directory/folder the first time they run
     NoteBag.
+
+    Returns False if it failed, or needs to try again; returns True if
+    it succeeds, or doesn't need to happen at all.
     """
 
     if not os.path.isfile(get_config_path(CONFIG_FILENAME)):
